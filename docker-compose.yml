@@ -10,6 +10,7 @@ services:
       - .env
     volumes:
       - ./backend:/backend
+      - model_cache:/root/.cache  # volume для clip/whisper
     environment:
       - REDIS_HOST=redis
       - PYTHONUNBUFFERED=1
@@ -22,23 +23,24 @@ services:
     networks:
       - dev
 
-  celery:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    command: ["celery", "-A", "config", "worker", "--loglevel=info"]
-    env_file:
-      - .env
-    volumes:
-      - ./backend:/backend
-    environment:
-      - REDIS_HOST=redis
-      - PYTHONUNBUFFERED=1
-    depends_on:
-      - backend
-      - redis
-    networks:
-      - dev
+  # celery:
+  #   build:
+  #     context: .
+  #     dockerfile: backend/Dockerfile
+  #   command: ["celery", "-A", "config", "worker", "--loglevel=info"]
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./backend:/backend
+  #     - model_cache:/root/.cache  # общий volume для моделей
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - PYTHONUNBUFFERED=1
+  #   depends_on:
+  #     - backend
+  #     - redis
+  #   networks:
+  #     - dev
 
   redis:
     image: redis:alpine
@@ -51,3 +53,4 @@ services:
 
 volumes:
   redis_data:
+  model_cache:

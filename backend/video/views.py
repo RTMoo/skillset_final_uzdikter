@@ -16,5 +16,6 @@ def upload_video(request):
     
     video = serializer.validated_data["video"]
     email = serializer.validated_data["email"]
+    path = video.temporary_file_path()
     
-    return Response({"ok": email, "video": str(type(video))})
+    return Response({"ok": email, "video": str(type(video)), "path": path})

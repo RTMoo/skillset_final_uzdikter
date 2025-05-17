@@ -4,6 +4,8 @@ import zipfile
 import os
 import uuid
 import subprocess
+from .highlights import req_to_gemini, hashtag_to_gemini
+from PIL import Image
 
 def cut_video_segments(video_path: str, timestamps: list[int]) -> list[str]:
     segment_paths = []
@@ -42,16 +44,32 @@ def convert_to_seconds(t: str) -> int:
     h, m, s = map(float, t.split(":"))
     return int(timedelta(hours=h, minutes=m, seconds=s).total_seconds())
 
-def send_zip_via_email(to_email: str, zip_path: str):
+def send_zip_via_email(to_email: str, zip_path: str, img_path: str):
+    title = req_to_gemini(Image.open(img_path))
+    tags = hashtag_to_gemini(Image.open(img_path))
+
     subject = "Ваши нарезки с видео"
     body = "Во вложении находятся выделенные фрагменты видео."
     
     email = EmailMessage(
         subject=subject,
         body=body,
-        from_email=None,  # берётся из DEFAULT_FROM_EMAIL
+        from_email=None,
         to=[to_email]
     )
     
-    email.attach_file(zip_path)  # Прикрепляем .zip файл
+    email.attach_file(zip_path)
+    
+    email.attach(
+        filename="video_name.txt",
+        content=title,
+        mimetype="text/plain"
+    )
+    
+    email.attach(
+        filename="video_tags.txt",
+        content=tags,
+        mimetype="text/plain"
+    )
+
     email.send()

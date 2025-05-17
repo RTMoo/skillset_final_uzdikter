@@ -10,47 +10,18 @@ services:
       - .env
     volumes:
       - ./backend:/backend
-      - model_cache:/root/.cache  # volume для clip/whisper
+      - model_cache:/root/.cache
     environment:
       - REDIS_HOST=redis
       - PYTHONUNBUFFERED=1
     ports:
       - "8000:8000"
-    depends_on:
-      - redis
+
     command: >
       sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     networks:
       - dev
 
-  # celery:
-  #   build:
-  #     context: .
-  #     dockerfile: backend/Dockerfile
-  #   command: ["celery", "-A", "config", "worker", "--loglevel=info"]
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - ./backend:/backend
-  #     - model_cache:/root/.cache  # общий volume для моделей
-  #   environment:
-  #     - REDIS_HOST=redis
-  #     - PYTHONUNBUFFERED=1
-  #   depends_on:
-  #     - backend
-  #     - redis
-  #   networks:
-  #     - dev
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - dev
 
 volumes:
-  redis_data:
   model_cache:
